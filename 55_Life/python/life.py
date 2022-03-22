@@ -13,12 +13,12 @@ MAX_WIDTH = 70
 MAX_HEIGHT = 24
 
 
-def print_centered(msg):
+def print_centered(msg) -> None:
     spaces = " " * ((PAGE_WIDTH - len(msg)) // 2)
     print(spaces + msg)
 
 
-def print_header(title):
+def print_header(title) -> None:
     print_centered(title)
     print_centered("CREATIVE COMPUTING  MORRISTOWN, NEW JERSEY")
     print()
@@ -48,14 +48,14 @@ def get_pattern():
         c += 1
 
 
-def main():
+def main() -> None:
     print_header("LIFE")
 
     pattern = get_pattern()
 
     pattern_height = len(pattern)
     pattern_width = 0
-    for line_num, line in pattern.items():
+    for _line_num, line in pattern.items():
         pattern_width = max(pattern_width, len(line))
 
     min_x = 11 - pattern_height // 2
@@ -94,7 +94,7 @@ def main():
 
         p = 0
         g += 1
-        for x in range(0, min_x):
+        for _ in range(min_x):
             print()
 
         for x in range(min_x, max_x + 1):
@@ -120,7 +120,7 @@ def main():
             print("".join(line))
 
         # line 295
-        for x in range(max_x + 1, MAX_HEIGHT):
+        for _ in range(max_x + 1, MAX_HEIGHT):
             print()
 
         print()

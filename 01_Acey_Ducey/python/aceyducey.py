@@ -58,33 +58,48 @@ def get_card_name(number: int) -> str:
 
 def display_bankroll(bank_roll: int) -> None:
     """Print current bankroll"""
-    if BANK_ROLL > 0:
-        print("You now have %s dollars\n" % bank_roll)
+    if bank_roll > 0:
+        print(f"You now have {bank_roll} dollars\n")
 
 
-# Display initial title and instructions
-print("\n           Acey Ducey Card Game")
-print("Creative Computing  Morristown, New Jersey")
-print("\n\n")
-print("Acey-Ducey is played in the following manner")
-print("The dealer (computer) deals two cards face up")
-print("You have an option to bet or not bet depending")
-print("on whether or not you feel the card will have")
-print("a value between the first two.")
-print("If you do not want to bet, input a 0")
+def main() -> None:
+    """Display initial title and instructions."""
+    print("\n           Acey Ducey Card Game")
+    print("Creative Computing  Morristown, New Jersey")
+    print("\n\n")
+    print("Acey-Ducey is played in the following manner")
+    print("The dealer (computer) deals two cards face up")
+    print("You have an option to bet or not bet depending")
+    print("on whether or not you feel the card will have")
+    print("a value between the first two.")
+    print("If you do not want to bet, input a 0")
+
+    multiple_game_loop()
+
+    print("OK Hope you had fun\n")
 
 
-# Loop for series of multiple games
-KEEP_PLAYING = True
-while KEEP_PLAYING:
+def multiple_game_loop() -> None:
+    """Loop for series of multiple games."""
+    keep_playing = True
+    while keep_playing:
+        # Initialize bankroll at start of each game
+        BANK_ROLL = DEFAULT_BANKROLL
+        display_bankroll(BANK_ROLL)
 
-    # Initialize bankroll at start of each game
-    BANK_ROLL = DEFAULT_BANKROLL
-    display_bankroll(BANK_ROLL)
+        single_round(BANK_ROLL)
 
-    # Loop for a single round.  Repeat until out of money.
+        print("\n\nSorry, friend but you blew your wad")
+        player_response = input("Try again (yes or no) ")
+        if player_response.lower() == "yes":
+            print()
+        else:
+            keep_playing = False
+
+
+def single_round(BANK_ROLL: int) -> None:
+    """Loop for a single round.  Repeat until out of money."""
     while BANK_ROLL > 0:
-
         # Deal out dealer cards
         print("Here are your next two cards")
         dealer1 = deal_card_num()
@@ -115,7 +130,7 @@ while KEEP_PLAYING:
                     print("Chicken!!\n")
                 elif curr_bet > BANK_ROLL:
                     print("Sorry, my friend but you bet too much")
-                    print("You have only %s dollars to bet\n" % BANK_ROLL)
+                    print(f"You have only {BANK_ROLL} dollars to bet\n")
                 else:
                     # Deal player card
                     BET_IS_VALID = True
@@ -133,18 +148,9 @@ while KEEP_PLAYING:
                     # Update player on new bankroll level
                     display_bankroll(BANK_ROLL)
 
-    # End of loop for a single round
 
-    print("\n\nSorry, friend but you blew your wad")
-    player_response = input("Try again (yes or no) ")
-    if player_response.lower() == "yes":
-        print()
-    else:
-        KEEP_PLAYING = False
-
-# End of multiple game loop
-
-print("OK Hope you had fun\n")
+if __name__ == "__main__":
+    main()
 
 
 ########################################################

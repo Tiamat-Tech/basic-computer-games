@@ -6,19 +6,18 @@ Weapon targeting simulation / 3d trigonometry practice
 Ported by Dave LeCompte
 """
 
-import collections
 import math
 import random
 
 PAGE_WIDTH = 64
 
 
-def print_centered(msg):
+def print_centered(msg: str) -> None:
     spaces = " " * ((PAGE_WIDTH - len(msg)) // 2)
     print(spaces + msg)
 
 
-def print_header(title):
+def print_header(title: str) -> None:
     print_centered(title)
     print_centered("CREATIVE COMPUTING  MORRISTOWN, NEW JERSEY")
     print()
@@ -26,7 +25,7 @@ def print_header(title):
     print()
 
 
-def print_instructions():
+def print_instructions() -> None:
     print("YOU ARE THE WEAPONS OFFICER ON THE STARSHIP ENTERPRISE")
     print("AND THIS IS A TEST TO SEE HOW ACCURATE A SHOT YOU")
     print("ARE IN A THREE-DIMENSIONAL RANGE.  YOU WILL BE TOLD")
@@ -45,7 +44,7 @@ def print_instructions():
 def prompt():
     while True:
         response = input("INPUT ANGLE DEVIATION FROM X, DEVIATION FROM Z, DISTANCE? ")
-        if not ("," in response):
+        if "," not in response:
             continue
 
         terms = response.split(",")
@@ -56,7 +55,7 @@ def prompt():
 
 
 def next_target():
-    for i in range(5):
+    for _ in range(5):
         print()
     print("NEXT TARGET...")
     print()
@@ -129,9 +128,9 @@ def do_shot_loop(p1, x, y, z):
             print()
             print(" * * * HIT * * *   TARGET IS NON FUNCTIONAL")
             print()
-            print(f"DISTANCE OF EXPLOSION FROM TARGET WAS {d:.4f} KILOMETERS")
+            print(f"DISTANCE OF EXPLOSION FROM TARGET WAS {distance:.4f} KILOMETERS")
             print()
-            print(f"MISSION ACCOMPLISHED IN {r} SHOTS.")
+            print(f"MISSION ACCOMPLISHED IN {shot_count} SHOTS.")
 
             return
         else:
@@ -161,7 +160,7 @@ def play_game():
         next_target()
 
 
-def main():
+def main() -> None:
     print_header("TARGET")
     print_instructions()
 

@@ -26,12 +26,12 @@ MoveRecord = collections.namedtuple(
 )
 
 
-def print_centered(msg):
+def print_centered(msg: str) -> None:
     spaces = " " * ((PAGE_WIDTH - len(msg)) // 2)
     print(spaces + msg)
 
 
-def print_header(title):
+def print_header(title: str) -> None:
     print_centered(title)
     print_centered("CREATIVE COMPUTING  MORRISTOWN, NEW JERSEY")
     print()
@@ -50,7 +50,7 @@ def get_coordinates(prompt):
 
         try:
             x, y = (int(c) for c in response.split(","))
-        except ValueError as ve:
+        except ValueError:
             print(err_msg)
             continue
 
@@ -62,7 +62,7 @@ def is_legal_board_coordinate(x, y):
 
 
 class Board:
-    def __init__(self):
+    def __init__(self) -> None:
         self.spaces = [[0 for y in range(8)] for x in range(8)]
         for x in range(8):
             if (x % 2) == 0:
@@ -74,7 +74,7 @@ class Board:
                 self.spaces[x][5] = COMPUTER_PIECE
                 self.spaces[x][1] = HUMAN_PIECE
 
-    def __str__(self):
+    def __str__(self) -> str:
         pieces = {
             EMPTY_SPACE: ".",
             HUMAN_PIECE: "O",
@@ -237,11 +237,11 @@ class Board:
                 if self.spaces[landing_x][landing_y] == COMPUTER_PIECE:
                     for delta_x in (-2, 2):
                         test_record = self.try_extend(landing_x, landing_y, delta_x, -2)
-                        if not (move_record is None):
-                            if (best_move is None) or (
-                                move_record.quality > best_move.quality
-                            ):
-                                best_move = test_record
+                        if (move_record is not None) and (
+                            (best_move is None)
+                            or (move_record.quality > best_move.quality)
+                        ):
+                            best_move = test_record
                 else:
                     assert self.spaces[landing_x][landing_y] == COMPUTER_KING
                     for delta_x in (-2, 2):
@@ -336,7 +336,7 @@ class Board:
         return True
 
 
-def print_instructions():
+def print_instructions() -> None:
     print("THIS IS THE GAME OF CHECKERS.  THE COMPUTER IS X,")
     print("AND YOU ARE O.  THE COMPUTER WILL MOVE FIRST.")
     print("SQUARES ARE REFERRED TO BY A COORDINATE SYSTEM.")
@@ -351,17 +351,17 @@ def print_instructions():
     print()
 
 
-def print_human_won():
+def print_human_won() -> None:
     print()
     print("YOU WIN.")
 
 
-def print_computer_won():
+def print_computer_won() -> None:
     print()
     print("I WIN.")
 
 
-def play_game():
+def play_game() -> None:
     board = Board()
 
     while True:
@@ -387,7 +387,7 @@ def play_game():
                 board.play_human_move(start_x, start_y, dest_x, dest_y)
 
 
-def main():
+def main() -> None:
     print_header("CHECKERS")
     print_instructions()
 

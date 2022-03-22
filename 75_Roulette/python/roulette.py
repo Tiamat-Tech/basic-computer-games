@@ -1,11 +1,12 @@
 import random
 from datetime import date
+from typing import List, Tuple
 
 global RED_NUMBERS
 RED_NUMBERS = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36]
 
 
-def print_instructions():
+def print_instructions() -> None:
     print(
         """
 THIS IS THE BETTING LAYOUT
@@ -59,75 +60,69 @@ THE MINIMUM BET IS $5, THE MAXIMUM IS $500.
     )
 
 
-def query_bets():
+def query_bets() -> Tuple[List[int], List[int]]:
     """Queries the user to input their bets"""
-    betCount = -1
-    while betCount <= 0:
+    bet_count = -1
+    while bet_count <= 0:
         try:
-            betCount = int(input("HOW MANY BETS? "))
-        except:
+            bet_count = int(input("HOW MANY BETS? "))
+        except Exception:
             ...
 
-    bet_IDs = [-1] * betCount
-    bet_Values = [0] * betCount
+    bet_ids = [-1] * bet_count
+    bet_values = [0] * bet_count
 
-    for i in range(betCount):
-        while bet_IDs[i] == -1:
+    for i in range(bet_count):
+        while bet_ids[i] == -1:
             try:
                 inString = input("NUMBER " + str(i + 1) + "? ").split(",")
-                id, val = int(inString[0]), int(inString[1])
+                id_, val = int(inString[0]), int(inString[1])
 
                 # check other bet_IDs
                 for j in range(i):
-                    if id != -1 and bet_IDs[j] == id:
-                        id = -1
+                    if id_ != -1 and bet_ids[j] == id_:
+                        id_ = -1
                         print("YOU ALREADY MADE THAT BET ONCE, DUM-DUM")
                         break
 
-                if id > 0 and id <= 50 and val >= 5 and val <= 500:
-                    bet_IDs[i] = id
-                    bet_Values[i] = val
-            except:
-                ...
-    return bet_IDs, bet_Values
+                if id_ > 0 and id_ <= 50 and val >= 5 and val <= 500:
+                    bet_ids[i] = id_
+                    bet_values[i] = val
+            except Exception:
+                pass
+    return bet_ids, bet_values
 
 
-def bet_results(bet_IDs, bet_Values, result):
+def bet_results(bet_ids: List[int], bet_values: List[int], result):
     """Computes the results, prints them, and returns the total net winnings"""
     total_winnings = 0
 
-    def get_modifier(id, num):
-        if id == 37 and num <= 12:
+    def get_modifier(id_: int, num: int) -> int:
+        if (
+            (id_ == 37 and num <= 12)
+            or (id_ == 38 and num > 12 and num <= 24)
+            or (id_ == 39 and num > 24 and num < 37)
+            or (id_ == 40 and num < 37 and num % 3 == 1)
+            or (id_ == 41 and num < 37 and num % 3 == 2)
+            or (id_ == 42 and num < 37 and num % 3 == 0)
+        ):
             return 2
-        elif id == 38 and num > 12 and num <= 24:
-            return 2
-        elif id == 39 and num > 24 and num < 37:
-            return 2
-        elif id == 40 and num < 37 and num % 3 == 1:
-            return 2
-        elif id == 41 and num < 37 and num % 3 == 2:
-            return 2
-        elif id == 42 and num < 37 and num % 3 == 0:
-            return 2
-        elif id == 43 and num <= 18:
+        elif (
+            (id_ == 43 and num <= 18)
+            or (id_ == 44 and num > 18 and num <= 36)
+            or (id_ == 45 and num % 2 == 0)
+            or (id_ == 46 and num % 2 == 1)
+            or (id_ == 47 and num in RED_NUMBERS)
+            or (id_ == 48 and num not in RED_NUMBERS)
+        ):
             return 1
-        elif id == 44 and num > 18 and num <= 36:
-            return 1
-        elif id == 45 and num % 2 == 0:
-            return 1
-        elif id == 46 and num % 2 == 1:
-            return 1
-        elif id == 47 and num in RED_NUMBERS:
-            return 1
-        elif id == 48 and num not in RED_NUMBERS:
-            return 1
-        elif id < 37 and id == num:
+        elif id_ < 37 and id_ == num:
             return 35
         else:
             return -1
 
-    for i in range(len(bet_IDs)):
-        winnings = bet_Values[i] * get_modifier(bet_IDs[i], result)
+    for i in range(len(bet_ids)):
+        winnings = bet_values[i] * get_modifier(bet_ids[i], result)
         total_winnings += winnings
 
         if winnings >= 0:
@@ -138,7 +133,7 @@ def bet_results(bet_IDs, bet_Values, result):
     return winnings
 
 
-def print_check(amount):
+def print_check(amount: int) -> None:
     """Prints a check of a given amount"""
     name = input("TO WHOM SHALL I MAKE THE CHECK? ")
 
@@ -155,7 +150,7 @@ def print_check(amount):
     print("-" * 72)
 
 
-def main():
+def main() -> None:
     player_balance = 1000
     host_balance = 100000
 
@@ -165,11 +160,11 @@ def main():
     print()
     print()
 
-    if stringtobool(input("DO YOU WANT INSTRUCTIONS? ")):
+    if string_to_bool(input("DO YOU WANT INSTRUCTIONS? ")):
         print_instructions()
 
     while True:
-        bet_IDs, bet_Values = query_bets()
+        bet_ids, bet_values = query_bets()
 
         print("SPINNING")
         print()
@@ -186,7 +181,7 @@ def main():
             print(str(val) + " BLACK")
 
         print()
-        total_winnings = bet_results(bet_IDs, bet_Values, val)
+        total_winnings = bet_results(bet_ids, bet_values, val)
         player_balance += total_winnings
         host_balance -= total_winnings
 
@@ -201,7 +196,7 @@ def main():
             print("YOU BROKE THE HOUSE!")
             player_balance = 101000
             break
-        if not stringtobool(input("PLAY AGAIN? ")):
+        if not string_to_bool(input("PLAY AGAIN? ")):
             break
 
     if player_balance <= 0:
@@ -212,7 +207,7 @@ def main():
     print("COME BACK SOON!")
 
 
-def stringtobool(string):
+def string_to_bool(string: str) -> bool:
     """Converts a string to a bool"""
     return string.lower() in ("yes", "y", "true", "t", "yes")
 

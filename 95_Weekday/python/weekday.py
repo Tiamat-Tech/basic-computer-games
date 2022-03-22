@@ -16,7 +16,7 @@ import datetime
 GET_TODAY_FROM_SYSTEM = True
 
 
-def print_with_tab(space_count, s):
+def print_with_tab(space_count: int, s: str) -> None:
     if space_count > 0:
         spaces = " " * space_count
     else:
@@ -30,7 +30,7 @@ def get_date_from_user(prompt):
         date_str = input()
         try:
             month_num, day_num, year_num = (int(x) for x in date_str.split(","))
-        except Exception as e:
+        except Exception:
             print("I COULDN'T UNDERSTAND THAT. TRY AGAIN.")
         return month_num, day_num, year_num
 
@@ -142,11 +142,11 @@ def calculate_day_of_week(year, month, day):
 
 
 def end():
-    for i in range(5):
+    for _ in range(5):
         print()
 
 
-def main():
+def main() -> None:
     print_with_tab(32, "WEEKDAY")
     print_with_tab(15, "CREATIVE COMPUTING  MORRISTOWN, NEW JERSEY")
     print()
@@ -186,11 +186,9 @@ def main():
     target_day_value = calc_day_value(year, month, day)
 
     is_today = False
-    is_future = False
 
     if today_day_value < target_day_value:
         label = "WILL BE A"
-        is_future = False
     elif today_day_value == target_day_value:
         label = "IS A"
         is_today = True
@@ -259,27 +257,6 @@ def main():
     e = year + 65
     print_with_tab(16, f"***  YOU MAY RETIRE IN {e} ***")
     end()
-
-
-def test_weekday_calc(year, month, day):
-    dt = datetime.date(year, month, day)
-    python_weekday = dt.weekday()  # Monday = 0, Sunday = 6
-
-    basic_weekday = calculate_day_of_week(year, month, day)  # Sunday = 1, Saturday = 7
-
-    test = ((python_weekday + 2) % 7) == (basic_weekday % 7)
-    if test == False:
-        print(f"testing yr {year} month {month} day {day}")
-        print(f"python says {python_weekday}")
-        print(f"BASIC says {basic_weekday}")
-        assert False
-
-
-def test_harness():
-    for yr in range(1600, 2021):
-        for m in range(1, 12):
-            for d in range(1, 28):
-                test_weekday_calc(yr, m, d)
 
 
 if __name__ == "__main__":

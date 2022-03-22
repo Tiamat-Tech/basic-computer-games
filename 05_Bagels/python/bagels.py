@@ -1,43 +1,42 @@
-######################################################################
-#
-# Bagels
-#
-# From: BASIC Computer Games (1978)
-#       Edited by David H. Ahl
-#
-# "In this game, the computer picks a 3-digit secret number using
-#  the digits 0 to 9 and you attempt to guess what it is.  You are
-#  allowed up to twenty guesses.  No digit is repeated.  After
-#  each guess the computer will give you clues about your guess
-#  as follows:
-#
-#  PICO     One digit is correct, but in the wrong place
-#  FERMI    One digit is in the correct place
-#  BAGELS   No digit is correct
-#
-# "You will learn to draw inferences from the clues and, with
-#  practice, you'll learn to improve your score.  There are several
-#  good strategies for playing Bagels.  After you have found a good
-#  strategy, see if you can improve it.  Or try a different strategy
-#  altogether and see if it is any better.  While the program allows
-#  up to twenty guesses, if you use a good strategy it should not
-#  take more than eight guesses to get any number.
-#
-# "The original authors of this program are D. Resek and P. Rowe of
-#  the Lawrence Hall of Science, Berkeley, California."
-#
-#
-# Python port by Jeff Jetton, 2019
-#
-######################################################################
+"""
+Bagels
+
+From: BASIC Computer Games (1978)
+      Edited by David H. Ahl
+
+"In this game, the computer picks a 3-digit secret number using
+ the digits 0 to 9 and you attempt to guess what it is.  You are
+ allowed up to twenty guesses.  No digit is repeated.  After
+ each guess the computer will give you clues about your guess
+ as follows:
+
+ PICO     One digit is correct, but in the wrong place
+ FERMI    One digit is in the correct place
+ BAGELS   No digit is correct
+
+"You will learn to draw inferences from the clues and, with
+ practice, you'll learn to improve your score.  There are several
+ good strategies for playing Bagels.  After you have found a good
+ strategy, see if you can improve it.  Or try a different strategy
+ altogether and see if it is any better.  While the program allows
+ up to twenty guesses, if you use a good strategy it should not
+ take more than eight guesses to get any number.
+
+"The original authors of this program are D. Resek and P. Rowe of
+ the Lawrence Hall of Science, Berkeley, California."
+
+
+Python port by Jeff Jetton, 2019
+"""
 
 
 import random
+from typing import List
 
 MAX_GUESSES = 20
 
 
-def print_rules():
+def print_rules() -> None:
     print("\nI am thinking of a three-digit number.  Try to guess")
     print("my number and I will give you clues as follows:")
     print("   PICO   - One digit correct but in the wrong position")
@@ -45,17 +44,17 @@ def print_rules():
     print("   BAGELS - No digits correct")
 
 
-def pick_number():
+def pick_number() -> List[str]:
     # Note that this returns a list of individual digits
     # as separate strings, not a single integer or string
-    numbers = [i for i in range(10)]
+    numbers = list(range(10))
     random.shuffle(numbers)
     num = numbers[0:3]
-    num = [str(i) for i in num]
-    return num
+    num_str = [str(i) for i in num]
+    return num_str
 
 
-def get_valid_guess():
+def get_valid_guess(guesses: int) -> str:
     valid = False
     while not valid:
         guess = input(f"Guess # {guesses}     ? ")
@@ -68,9 +67,7 @@ def get_valid_guess():
                 if len(set(guess)) == 3:
                     valid = True
                 else:
-                    print(
-                        "Oh, I forgot to tell you that " + "the number I have in mind"
-                    )
+                    print("Oh, I forgot to tell you that the number I have in mind")
                     print("has no two digits the same.")
             else:
                 print("What?")
@@ -80,8 +77,7 @@ def get_valid_guess():
     return guess
 
 
-def build_result_string(num, guess):
-
+def build_result_string(num: List[str], guess: str) -> str:
     result = ""
 
     # Correct digits in wrong place
@@ -107,63 +103,63 @@ def build_result_string(num, guess):
     return result
 
 
-######################################################################
+def main() -> None:
+    # Intro text
+    print("\n                Bagels")
+    print("Creative Computing  Morristown, New Jersey")
+    print("\n\n")
 
-
-# Intro text
-print("\n                Bagels")
-print("Creative Computing  Morristown, New Jersey")
-print("\n\n")
-
-# Anything other than N* will show the rules
-response = input("Would you like the rules (Yes or No)? ")
-if len(response) > 0:
-    if response.upper()[0] != "N":
+    # Anything other than N* will show the rules
+    response = input("Would you like the rules (Yes or No)? ")
+    if len(response) > 0:
+        if response.upper()[0] != "N":
+            print_rules()
+    else:
         print_rules()
-else:
-    print_rules()
 
-games_won = 0
-still_running = True
-while still_running:
+    games_won = 0
+    still_running = True
+    while still_running:
 
-    # New round
-    num = pick_number()
-    num_str = "".join(num)
-    guesses = 1
+        # New round
+        num = pick_number()
+        num_str = "".join(num)
+        guesses = 1
 
-    print("\nO.K.  I have a number in mind.")
-    guessing = True
-    while guessing:
+        print("\nO.K.  I have a number in mind.")
+        guessing = True
+        while guessing:
 
-        guess = get_valid_guess()
+            guess = get_valid_guess(guesses)
 
-        if guess == num_str:
-            print("You got it!!!\n")
-            games_won += 1
-            guessing = False
-        else:
-            print(build_result_string(num, guess))
-            guesses += 1
-            if guesses > MAX_GUESSES:
-                print("Oh well")
-                print(f"That's {MAX_GUESSES} guesses.  " + "My number was " + num_str)
+            if guess == num_str:
+                print("You got it!!!\n")
+                games_won += 1
                 guessing = False
+            else:
+                print(build_result_string(num, guess))
+                guesses += 1
+                if guesses > MAX_GUESSES:
+                    print("Oh well")
+                    print(f"That's {MAX_GUESSES} guesses.  My number was {num_str}")
+                    guessing = False
 
-    valid_response = False
-    while not valid_response:
-        response = input("Play again (Yes or No)? ")
-        if len(response) > 0:
-            valid_response = True
-            if response.upper()[0] != "Y":
-                still_running = False
+        valid_response = False
+        while not valid_response:
+            response = input("Play again (Yes or No)? ")
+            if len(response) > 0:
+                valid_response = True
+                if response.upper()[0] != "Y":
+                    still_running = False
+
+    if games_won > 0:
+        print(f"\nA {games_won} point Bagels buff!!")
+
+    print("Hope you had fun.  Bye.\n")
 
 
-if games_won > 0:
-    print(f"\nA {games_won} point Bagels buff!!")
-
-print("Hope you had fun.  Bye.\n")
-
+if __name__ == "__main__":
+    main()
 
 ######################################################################
 #

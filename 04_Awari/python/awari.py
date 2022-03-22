@@ -6,97 +6,82 @@ An ancient African game (see also Kalah, Mancala).
 Ported by Dave LeCompte
 """
 
-"""
+# PORTING NOTES
+#
+# This game started out as 70 lines of BASIC, and I have ported it
+# before. I find it somewhat amazing how efficient (densely packed) the
+# original code is. Of course, the original code has fairly cryptic
+# variable names (as was forced by BASIC's limitation on long (2+
+# character) variable names). I have done my best here to interpret what
+# each variable is doing in context, and rename them appropriately.
+#
+# I have endeavored to leave the logic of the code in place, as it's
+# interesting to see a 2-ply game tree evaluation written in BASIC,
+# along with what a reader in 2021 would call "machine learning".
+#
+# As each game is played, the move history is stored as base-6
+# digits stored losing_book[game_number]. If the human player wins or
+# draws, the computer increments game_number, effectively "recording"
+# that loss to be referred to later. As the computer evaluates moves, it
+# checks the potential game state against these losing game records, and
+# if the potential move matches with the losing game (up to the current
+# number of moves), that move is evaluated at a two point penalty.
+#
+# Compare this, for example with MENACE, a mechanical device for
+# "learning" tic-tac-toe:
+# https://en.wikipedia.org/wiki/Matchbox_Educable_Noughts_and_Crosses_Engine
+#
+# The base-6 representation allows game history to be VERY efficiently
+# represented. I considered whether to rewrite this representation to be
+# easier to read, but I elected to TRY to document it, instead.
+#
+# Another place where I have made a difficult decision between accuracy
+# and correctness is inside the "wrapping" code where it considers
+# "while human_move_end > 13". The original BASIC code reads:
+#
+# 830 IF L>13 THEN L=L-14:R=1:GOTO 830
+#
+# I suspect that the intention is not to assign 1 to R, but to increment
+# R. I discuss this more in a porting note comment next to the
+# translated code. If you wish to play a more accurate version of the
+# game as written in the book, you can convert the increment back to an
+# assignment.
+#
+# I continue to be impressed with this jewel of a game; as soon as I had
+# the AI playing against me, it was beating me. I've been able to score
+# a few wins against the computer, but even at its 2-ply lookahead, it
+# beats me nearly always. I would like to become better at this game to
+# explore the effectiveness of the "losing book" machine learning.
+#
+#
+# EXERCISES FOR THE READER
+# One could go many directions with this game:
+# - change the initial number of stones in each pit
+# - change the number of pits
+# - only allow capturing if you end on your side of the board
+# - don't allow capturing at all
+# - don't drop a stone into the enemy "home"
+# - go clockwise, instead
+# - allow the player to choose to go clockwise or counterclockwise
+# - instead of a maximum of two moves, allow each move that ends on the
+#   "home" to be followed by a free move.
+# - increase the AI lookahead
+# - make the scoring heuristic a little more nuanced
+# - store history to a file on disk (or in the cloud!) to allow the AI
+#   to learn over more than a single session
 
-PORTING NOTES
+from typing import Dict, List, Tuple
 
-This game started out as 70 lines of BASIC, and I have ported it
-before. I find it somewhat amazing how efficient (densely packed) the
-original code is. Of course, the original code has fairly cryptic
-variable names (as was forced by BASIC's limitation on long (2+
-character) variable names). I have done my best here to interpret what
-each variable is doing in context, and rename them appropriately.
-
-I have endeavored to leave the logic of the code in place, as it's
-interesting to see a 2-ply game tree evaluation written in BASIC,
-along with what a reader in 2021 would call "machine learning".
-
-As each game is played, the move history is stored as base-6
-digits stored losing_book[game_number]. If the human player wins or
-draws, the computer increments game_number, effectively "recording"
-that loss to be referred to later. As the computer evaluates moves, it
-checks the potential game state against these losing game records, and
-if the potential move matches with the losing game (up to the current
-number of moves), that move is evaluated at a two point penalty.  
-
-Compare this, for example with MENACE, a mechanical device for
-"learning" tic-tac-toe:
-https://en.wikipedia.org/wiki/Matchbox_Educable_Noughts_and_Crosses_Engine
-
-The base-6 representation allows game history to be VERY efficiently
-represented. I considered whether to rewrite this representation to be
-easier to read, but I elected to TRY to document it, instead.
-
-Another place where I have made a difficult decision between accuracy
-and correctness is inside the "wrapping" code where it considers
-"while human_move_end > 13". The original BASIC code reads:
-
-830 IF L>13 THEN L=L-14:R=1:GOTO 830
-
-I suspect that the intention is not to assign 1 to R, but to increment
-R. I discuss this more in a porting note comment next to the
-translated code. If you wish to play a more accurate version of the
-game as written in the book, you can convert the increment back to an
-assignment.
-
-
-I continue to be impressed with this jewel of a game; as soon as I had
-the AI playing against me, it was beating me. I've been able to score
-a few wins against the computer, but even at its 2-ply lookahead, it
-beats me nearly always. I would like to become better at this game to
-explore the effectiveness of the "losing book" machine learning.
-
-
-EXERCISES FOR THE READER
-One could go many directions with this game:
-
-- change the initial number of stones in each pit
-
-- change the number of pits
-
-- only allow capturing if you end on your side of the board
-
-- don't allow capturing at all
-
-- don't drop a stone into the enemy "home"
-
-- go clockwise, instead
-
-- allow the player to choose to go clockwise or counterclockwise
-
-- instead of a maximum of two moves, allow each move that ends on the
-  "home" to be followed by a free move.
-
-- increase the AI lookahead
-
-- make the scoring heuristic a little more nuanced
-
-- store history to a file on disk (or in the cloud!) to allow the AI
-  to learn over more than a single session
-
-"""
-
-
-game_number = 0
-move_count = 0
-losing_book = []
+game_number: int = 0
+move_count: int = 0
+losing_book: List[int] = []
 n = 0
 
 MAX_HISTORY = 9
 LOSING_BOOK_SIZE = 50
 
 
-def print_with_tab(space_count, msg):
+def print_with_tab(space_count: int, msg: str) -> None:
     if space_count > 0:
         spaces = " " * space_count
     else:
@@ -104,7 +89,7 @@ def print_with_tab(space_count, msg):
     print(spaces + msg)
 
 
-def draw_pit(line, board, pit_index):
+def draw_pit(line: str, board, pit_index) -> str:
     val = board[pit_index]
     line = line + " "
     if val < 10:
@@ -113,7 +98,7 @@ def draw_pit(line, board, pit_index):
     return line
 
 
-def draw_board(board):
+def draw_board(board) -> None:
     print()
 
     # Draw the top (computer) pits
@@ -137,7 +122,7 @@ def draw_board(board):
     print()
 
 
-def play_game(board):
+def play_game(board: List[int]) -> None:
     # Place the beginning stones
     for i in range(0, 13):
         board[i] = 3
@@ -180,7 +165,7 @@ def play_game(board):
     game_over(board)
 
 
-def computer_move(msg, board):
+def computer_move(msg: str, board) -> Tuple[int, bool, int, str]:
     # This function does a two-ply lookahead evaluation; one computer
     # move plus one human move.
     #
@@ -255,7 +240,7 @@ def computer_move(msg, board):
             # penalize that move.
             for prev_game_number in range(game_number):
                 if losing_book[game_number] * 6 + move_digit == int(
-                    losing_book[prev_game_number] / 6 ^ (7 - move_count) + 0.1
+                    losing_book[prev_game_number] / 6 ^ (7 - move_count) + 0.1  # type: ignore
                 ):
                     computer_move_quality -= 2
 
@@ -280,7 +265,7 @@ def computer_move(msg, board):
     return move_number, is_still_going, home, msg
 
 
-def game_over(board):
+def game_over(board) -> None:
     print()
     print("GAME OVER")
 
@@ -298,43 +283,35 @@ def game_over(board):
             print(f"YOU WIN BY {pit_difference} POINTS")
 
 
-def do_capture(m, home, board):
+def do_capture(m, home, board) -> None:
     board[home] += board[12 - m] + 1
     board[m] = 0
     board[12 - m] = 0
 
 
-def do_move(m, home, board):
+def do_move(m, home, board) -> int:
     move_stones = board[m]
     board[m] = 0
 
-    for stones in range(move_stones, 0, -1):
+    for _stones in range(move_stones, 0, -1):
         m = m + 1
         if m > 13:
             m = m - 14
         board[m] += 1
-    if board[m] == 1:
-        # capture
-        if (m != 6) and (m != 13) and (board[12 - m] != 0):
-            do_capture(m, home, board)
+    if board[m] == 1 and (m != 6) and (m != 13) and (board[12 - m] != 0):
+        do_capture(m, home, board)
     return m
 
 
-def player_has_stones(board):
-    for i in range(6):
-        if board[i] > 0:
-            return True
-    return False
+def player_has_stones(board) -> bool:
+    return any(board[i] > 0 for i in range(6))
 
 
-def computer_has_stones(board):
-    for i in range(7, 13):
-        if board[i] > 0:
-            return True
-    return False
+def computer_has_stones(board: Dict[int, int]) -> bool:
+    return any(board[i] > 0 for i in range(7, 13))
 
 
-def execute_move(move, home, board):
+def execute_move(move, home: int, board) -> Tuple[int, bool, int]:
     move_digit = move
     last_location = do_move(move, home, board)
 
@@ -361,12 +338,12 @@ def execute_move(move, home, board):
     return last_location, is_still_going, home
 
 
-def player_move_again(board):
+def player_move_again(board) -> Tuple[int, bool, int]:
     print("AGAIN")
     return player_move(board)
 
 
-def player_move(board):
+def player_move(board) -> Tuple[int, bool, int]:
     while True:
         print("SELECT MOVE 1-6")
         m = int(input()) - 1
@@ -384,7 +361,7 @@ def player_move(board):
     return ending_spot, is_still_going, home
 
 
-def main():
+def main() -> None:
     print_with_tab(34, "AWARI")
     print_with_tab(15, "CREATIVE COMPUTING  MORRISTOWN, NEW JERSEY")
     print()

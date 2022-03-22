@@ -9,11 +9,12 @@ Ported by Peter Sharp
 
 from collections import namedtuple
 from random import randint
+from typing import Any, Dict
 
 PAGE_WIDTH = 64
 
 
-def main(states, data):
+def main(states, data) -> None:
     """
     Starts the game loop using given states and data
 
@@ -26,7 +27,7 @@ def main(states, data):
     """
 
     while True:
-        if "exit" == data["state"]:
+        if data["state"] == "exit":
             break
         view, control, model = states[data["state"]]
         cmd = view(data)
@@ -37,7 +38,7 @@ def main(states, data):
 Bodypart = namedtuple("Bodypart", ["name", "count", "depends"])
 
 
-def print_start(_):
+def print_start(_) -> str:
     """
     Prints start message
     """
@@ -63,7 +64,7 @@ def control_start(cmd):
     return action
 
 
-def print_instructions(data):
+def print_instructions(data) -> str:
     """
     Prints game instructions
     """
@@ -112,41 +113,41 @@ def update_game(data, action):
     # stores logs of what happened during a particular round
     logs = []
 
-    if "pictures" == action:
+    if action == "pictures":
         data["state"] = "pictures"
     else:
-        partAdded = False
-        while partAdded == False:
+        part_added = False
+        while not part_added:
             for player, parts in data["players"].items():
                 # rolls the dice for a part
-                newPartIdx = randint(1, 6) - 1
+                new_part_idx = randint(1, 6) - 1
 
                 # gets information about the picked part
-                partType = data["partTypes"][newPartIdx]
+                part_type = data["partTypes"][new_part_idx]
 
                 # gets the number of existing parts of that type the player has
-                partCount = parts[newPartIdx]
+                part_count = parts[new_part_idx]
 
-                logs.append(("rolled", newPartIdx, player))
+                logs.append(("rolled", new_part_idx, player))
 
                 # a new part can only be added if the player has the parts
                 # the new part depends on and doesn't have enough of the part already
-                overMaxParts = partType.count < partCount + 1
+                overMaxParts = part_type.count < part_count + 1
                 missingPartDep = (
-                    partType.depends != None and parts[partType.depends] == 0
+                    part_type.depends is not None and parts[part_type.depends] == 0
                 )
 
                 if not overMaxParts and not missingPartDep:
                     # adds a new part
-                    partCount += 1
-                    logs.append(("added", newPartIdx, player))
-                    partAdded = True
+                    part_count += 1
+                    logs.append(("added", new_part_idx, player))
+                    part_added = True
                 elif missingPartDep:
-                    logs.append(("missingDep", newPartIdx, player, partType.depends))
+                    logs.append(("missingDep", new_part_idx, player, part_type.depends))
                 if overMaxParts:
-                    logs.append(("overMax", newPartIdx, player, partCount))
+                    logs.append(("overMax", new_part_idx, player, part_count))
 
-                data["players"][player][newPartIdx] = partCount
+                data["players"][player][new_part_idx] = part_count
     data["logs"] = logs
 
     # checks if any players have finished their bug
@@ -162,73 +163,73 @@ def get_finished(data):
     """
     Gets players who have finished their bugs
     """
-    totalParts = sum(partType.count for partType in data["partTypes"])
+    total_parts = sum(part_type.count for part_type in data["partTypes"])
     finished = []
     for player, parts in data["players"].items():
-        if sum(parts) == totalParts:
+        if sum(parts) == total_parts:
             finished.append(player)
     return finished
 
 
-def print_game(data):
+def print_game(data) -> str:
     """
     Displays the results of the game turn
     """
     for log in data["logs"]:
-        code, partIdx, player, *logdata = log
-        partType = data["partTypes"][partIdx]
+        code, part_idx, player, *logdata = log
+        part_type = data["partTypes"][part_idx]
 
-        if "rolled" == code:
+        if code == "rolled":
             print()
-            print(f"{player} ROLLED A {partIdx + 1}")
-            print(f"{partIdx + 1}={partType.name}")
+            print(f"{player} ROLLED A {part_idx + 1}")
+            print(f"{part_idx + 1}={part_type.name}")
 
-        elif "added" == code:
-            if "YOU" == player:
-                if partType.name in ["FEELERS", "LEGS", "TAIL"]:
-                    print(f"I NOW GIVE YOU A {partType.name.replace('s', '')}.")
+        elif code == "added":
+            if player == "YOU":
+                if part_type.name in ["FEELERS", "LEGS", "TAIL"]:
+                    print(f"I NOW GIVE YOU A {part_type.name.replace('s', '')}.")
                 else:
-                    print(f"YOU NOW HAVE A {partType.name}.")
-            elif "I" == player:
-                if partType.name in ["BODY", "NECK", "TAIL"]:
-                    print(f"I NOW HAVE A {partType.name}.")
-                elif partType.name == "FEELERS":
+                    print(f"YOU NOW HAVE A {part_type.name}.")
+            elif player == "I":
+                if part_type.name in ["BODY", "NECK", "TAIL"]:
+                    print(f"I NOW HAVE A {part_type.name}.")
+                elif part_type.name == "FEELERS":
                     print("I GET A FEELER.")
 
-            if partType.count > 2:
+            if part_type.count > 2:
                 print(
-                    f"{player} NOW HAVE {data['players'][player][partIdx]} {partType.name}"
+                    f"{player} NOW HAVE {data['players'][player][part_idx]} {part_type.name}"
                 )
 
-        elif "missingDep" == code:
-            (depIdx,) = logdata
-            dep = data["partTypes"][depIdx]
+        elif code == "missingDep":
+            (dep_idx,) = logdata
+            dep = data["partTypes"][dep_idx]
             print(
                 f"YOU DO NOT HAVE A {dep.name}"
-                if "YOU" == player
+                if player == "YOU"
                 else f"I NEEDED A {dep.name}"
             )
 
-        elif "overMax" == code:
-            (partCount,) = logdata
-            if partCount > 1:
-                num = "TWO" if 2 == partCount else partCount
-                maxMsg = f"HAVE {num} {partType.name}S ALREADY"
+        elif code == "overMax":
+            (part_count,) = logdata
+            if part_count > 1:
+                num = "TWO" if part_count == 2 else part_count
+                maxMsg = f"HAVE {num} {part_type.name}S ALREADY"
             else:
-                maxMsg = f"ALREADY HAVE A {partType.name}"
+                maxMsg = f"ALREADY HAVE A {part_type.name}"
             print(f"{player} {maxMsg}")
 
     return input("DO YOU WANT THE PICTURES? ") if len(data["logs"]) else "n"
 
 
-def print_pictures(data):
+def print_pictures(data) -> None:
     """
     Displays what the bugs look like for each player
     """
-    typeIxs = {partType.name: idx for idx, partType in enumerate(data["partTypes"])}
+    typeIxs = {part_type.name: idx for idx, part_type in enumerate(data["partTypes"])}
     PIC_WIDTH = 22
     for player, parts in data["players"].items():
-        print(f"*****{'YOUR' if 'YOU' == player else 'MY'} BUG*****")
+        print(f"*****{'YOUR' if player == 'YOU' else 'MY'} BUG*****")
         print()
         print()
         if parts[typeIxs["BODY"]] > 0:
@@ -271,12 +272,12 @@ def control_game(cmd):
     return action
 
 
-def print_winner(data):
+def print_winner(data) -> None:
     """
     Displays the winning message
     """
     for player in data["finished"]:
-        print(f"{'YOUR' if 'YOU' == player else 'MY'} BUG IS FINISHED.")
+        print(f"{'YOUR' if player == 'YOU' else 'MY'} BUG IS FINISHED.")
     print("I HOPE YOU ENJOYED THE GAME, PLAY IT AGAIN SOON!!")
 
 
@@ -287,7 +288,7 @@ def exit_game(_):
     return "exit"
 
 
-def print_centered(msg, width=PAGE_WIDTH):
+def print_centered(msg, width=PAGE_WIDTH) -> None:
     """
     Prints given message centered to given width
     """
@@ -295,7 +296,7 @@ def print_centered(msg, width=PAGE_WIDTH):
     print(spaces + msg)
 
 
-def print_table(rows):
+def print_table(rows) -> None:
     for row in rows:
         print(*row, sep="\t")
 
@@ -317,7 +318,7 @@ if __name__ == "__main__":
     }
 
     # body part types used by the game to work out whether a player's body part can be added
-    partTypes = (
+    part_types = (
         Bodypart(name="BODY", count=1, depends=None),
         Bodypart(name="NECK", count=1, depends=0),
         Bodypart(name="HEAD", count=1, depends=1),
@@ -327,11 +328,11 @@ if __name__ == "__main__":
     )
 
     # all the data used by the game
-    data = {
+    data: Dict[str, Any] = {
         "state": "start",
         "partNo": None,
-        "players": {"YOU": [0] * len(partTypes), "I": [0] * len(partTypes)},
-        "partTypes": partTypes,
+        "players": {"YOU": [0] * len(part_types), "I": [0] * len(part_types)},
+        "partTypes": part_types,
         "finished": [],
         "logs": [],
     }

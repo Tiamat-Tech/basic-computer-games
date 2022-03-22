@@ -3,7 +3,7 @@ import random
 import time
 
 
-def basic_print(*zones, **kwargs):
+def basic_print(*zones, **kwargs) -> None:
     """Simulates the PRINT command from BASIC to some degree.
     Supports `printing zones` if given multiple arguments."""
 
@@ -92,7 +92,7 @@ def setup_horses():
     return [round(total / odd, 2) for odd in odds]
 
 
-def print_horse_odds(odds):
+def print_horse_odds(odds) -> None:
     """Print the odds for each horse"""
 
     basic_print("")
@@ -140,15 +140,13 @@ def get_distance(odd):
         return 4
     elif d < s + 77:
         return 5
-    elif d < s + 77:
-        return 5
     elif d < s + 92:
         return 6
     else:
         return 7
 
 
-def print_race_state(total_distance, race_pos):
+def print_race_state(total_distance, race_pos) -> None:
     """Outputs the current state/stop of the race.
     Each horse is placed according to the distance they have travelled. In
     case some horses travelled the same distance, their numbers are printed
@@ -166,12 +164,12 @@ def print_race_state(total_distance, race_pos):
     basic_print("XXXXSTARTXXXX")
 
     # print all 28 lines/unit of the race course
-    for l in range(28):
+    for line in range(28):
 
         # ensure we still have a horse to print and if so, check if the
         # next horse to print is not the current line
         # needs iteration, since multiple horses can share the same line
-        while next_pos is not None and l == total_distance[next_pos]:
+        while next_pos is not None and line == total_distance[next_pos]:
             basic_print(f"{next_pos} ", end="")
             next_pos = next(race_pos_iter, None)
         else:
@@ -209,8 +207,8 @@ def simulate_race(odds):
         # in the original implementation, race_pos is reset for each
         # simulation step, so we keep this behaviour here
         race_pos = list(range(num_horses))
-        for l in range(num_horses):
-            for i in range(num_horses - 1 - l):
+        for line in range(num_horses):
+            for i in range(num_horses - 1 - line):
                 if total_distance[race_pos[i]] < total_distance[race_pos[i + 1]]:
                     continue
                 race_pos[i], race_pos[i + 1] = race_pos[i + 1], race_pos[i]
@@ -228,17 +226,15 @@ def simulate_race(odds):
         time.sleep(1)
 
 
-def print_race_results(race_positions, odds, bets, player_names):
+def print_race_results(race_positions, odds, bets, player_names) -> None:
     """Print the race results, as well as the winnings of each player"""
 
     # print the race positions first
     basic_print("THE RACE RESULTS ARE:")
-    position = 1
-    for horse_idx in reversed(race_positions):
+    for position, horse_idx in enumerate(reversed(race_positions), start=1):
         line = f"{position} PLACE HORSE NO. {horse_idx} AT {odds[horse_idx]}:1"
         basic_print("")
         basic_print(line)
-        position += 1
 
     # followed by the amount the players won
     winning_horse_idx = race_positions[-1]
@@ -249,7 +245,7 @@ def print_race_results(race_positions, odds, bets, player_names):
             basic_print(f"{name} WINS ${amount * odds[winning_horse_idx]}")
 
 
-def main_loop(player_names, horse_odds):
+def main_loop(player_names, horse_odds) -> None:
     """Main game loop"""
 
     while True:
@@ -264,7 +260,7 @@ def main_loop(player_names, horse_odds):
             break
 
 
-def main():
+def main() -> None:
     # introduction, player names and horse odds are only generated once
     introduction()
     player_names = setup_players()

@@ -19,17 +19,18 @@
 # more structured style.
 #
 
-import random
-
 # global variables
 marbles_in_middle = -1
 human_marbles = -1
 computer_marbles = -1
 whose_turn = ""
 
-# Only called during development for serious errors that are due to mistakes
-# in the program. Should never be called during a regular game.
+
 def serious_error(msg):
+    """
+    Only call this function during development for serious errors that are due
+    to mistakes in the program. Should never be called during a regular game.
+    """
     print("serious_error: " + msg)
     exit(1)
 
@@ -87,11 +88,11 @@ def to_int(s):
     try:
         n = int(s)
         return True, n
-    except:
+    except Exception:
         return False, 0
 
 
-def print_board():
+def print_board() -> None:
     global marbles_in_middle
     global human_marbles
     global computer_marbles
@@ -207,7 +208,7 @@ def play_game():
             serious_error(f"play_game: unknown player {whose_turn}")
 
 
-def main():
+def main() -> None:
     global whose_turn
 
     welcome_screen()

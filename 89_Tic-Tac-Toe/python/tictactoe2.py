@@ -28,32 +28,26 @@ class Space(Enum):
 
 
 def line_170(board, g, h, j, k):
-    if g == OccupiedBy.Player:
-        if board[Space.MID_CENTER] == g:
-            if (
-                board[Space.TOP_RIGHT] == g
-                and board[Space.BOTTOM_LEFT] is OccupiedBy.EMPTY
-            ):  # Line 171
-                return Space.BOTTOM_LEFT  # Line 187
-            elif (
-                board[Space.BOTTOM_RIGHT] == g
-                and board[Space.TOP_LEFT] is OccupiedBy.EMPTY
-            ):  # Line 172
-                return Space.TOP_LEFT  # Line 181
-            elif (
-                board[Space.BOTTOM_LEFT] == g
-                and board[Space.TOP_RIGHT] is OccupiedBy.EMPTY
-            ):  # Line 173
-                return Space.TOP_RIGHT  # Line 183
-            elif (
-                board[Space.BOTTOM_RIGHT] is OccupiedBy.PLAYER
-                and board[Space.TOP_RIGHT] is OccupiedBy.EMPTY
-            ):  # Line 174
-                return Space.TOP_RIGHT  # Line 189
-            elif g is OccupiedBy.COMPUTER:
-                g = OccupiedBy.PLAYER
-                h = OccupiedBy.COMPUTER
-                return line_118(board, g, h, j, k)
+    if g == OccupiedBy.Player and board[Space.MID_CENTER] == g:
+        if (
+            board[Space.TOP_RIGHT] == g and board[Space.BOTTOM_LEFT] is OccupiedBy.EMPTY
+        ):  # Line 171
+            return Space.BOTTOM_LEFT  # Line 187
+        elif (
+            board[Space.BOTTOM_RIGHT] == g and board[Space.TOP_LEFT] is OccupiedBy.EMPTY
+        ):  # Line 172
+            return Space.TOP_LEFT  # Line 181
+        elif (
+            board[Space.BOTTOM_LEFT] == g and board[Space.TOP_RIGHT] is OccupiedBy.EMPTY
+        ) or (
+            board[Space.BOTTOM_RIGHT] is OccupiedBy.PLAYER
+            and board[Space.TOP_RIGHT] is OccupiedBy.EMPTY
+        ):  # Line 173 and 174
+            return Space.TOP_RIGHT  # Line 183 and Line 189
+        elif g is OccupiedBy.COMPUTER:
+            g = OccupiedBy.PLAYER
+            h = OccupiedBy.COMPUTER
+            return line_118(board, g, h, j, k)
 
 
 def line_150(board, g, h, j, k):
@@ -117,13 +111,13 @@ def think(board, g, h, moves):
 
     if g == OccupiedBy.PLAYER:
         j = 3 * int((moves - 1) / 3)
-        if move == j + 1:
+        if move == j + 1:  # noqa: This definitely is a bug!
             k = 1
-        if move == j + 2:
+        if move == j + 2:  # noqa: This definitely is a bug!
             k = 2
-        if move == j + 3:
+        if move == j + 3:  # noqa: This definitely is a bug!
             k = 3
-        return subthink(g, h, j, k)
+        return subthink(g, h, j, k)  # noqa: This definitely is a bug!
 
 
 def render_board(board, space_mapping):

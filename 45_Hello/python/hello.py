@@ -11,7 +11,7 @@ Ported by Dave LeCompte
 import time
 
 
-def print_with_tab(space_count, msg):
+def print_with_tab(space_count: int, msg: str) -> None:
     if space_count > 0:
         spaces = " " * space_count
     else:
@@ -32,7 +32,6 @@ def get_yes_or_no():
 def ask_enjoy_question(user_name):
     print(f"HI THERE, {user_name}, ARE YOU ENJOYING YOURSELF HERE?")
 
-    has_answer = False
     while True:
         valid, value, msg = get_yes_or_no()
 
@@ -74,16 +73,16 @@ def solve_sex_problem(user_name):
         valid, too_much = prompt_too_much_or_too_little()
         if valid:
             if too_much:
-                print(f"YOU CALL THAT A PROBLEM?!!  I SHOULD HAVE SUCH PROBLEMS!")
+                print("YOU CALL THAT A PROBLEM?!!  I SHOULD HAVE SUCH PROBLEMS!")
                 print(f"IF IT BOTHERS YOU, {user_name}, TAKE A COLD SHOWER.")
             else:
                 print(f"WHY ARE YOU HERE IN SUFFERN, {user_name}?  YOU SHOULD BE")
-                print(f"IN TOKYO OR NEW YORK OR AMSTERDAM OR SOMEPLACE WITH SOME")
-                print(f"REAL ACTION.")
+                print("IN TOKYO OR NEW YORK OR AMSTERDAM OR SOMEPLACE WITH SOME")
+                print("REAL ACTION.")
             return
         else:
             print(f"DON'T GET ALL SHOOK, {user_name}, JUST ANSWER THE QUESTION")
-            print(f"WITH 'TOO MUCH' OR 'TOO LITTLE'.  WHICH IS IT?")
+            print("WITH 'TOO MUCH' OR 'TOO LITTLE'.  WHICH IS IT?")
 
 
 def solve_money_problem(user_name):
@@ -141,7 +140,7 @@ def ask_question_loop(user_name):
 def ask_for_fee(user_name):
     print()
     print(f"THAT WILL BE $5.00 FOR THE ADVICE, {user_name}.")
-    print(f"PLEASE LEAVE THE MONEY ON THE TERMINAL.")
+    print("PLEASE LEAVE THE MONEY ON THE TERMINAL.")
     time.sleep(4)
     print()
     print()
@@ -178,7 +177,7 @@ def happy_goodbye(user_name):
     print(f"NICE MEETING YOU, {user_name}, HAVE A NICE DAY.")
 
 
-def main():
+def main() -> None:
     print_with_tab(33, "HELLO")
     print_with_tab(15, "CREATIVE COMPUTING  MORRISTOWN, NEW JERSEY")
     print()

@@ -4,7 +4,7 @@ import random
 QUESTION_PROMPT = "? "
 
 
-def play():
+def play() -> None:
     print("BOXING")
     print("CREATIVE COMPUTING   MORRISTOWN, NEW JERSEY")
     print("\n\n")
@@ -26,7 +26,7 @@ def play():
 
     print("DIFFERENT PUNCHES ARE 1 FULL SWING 2 HOOK 3 UPPERCUT 4 JAB")
     print("WHAT IS YOUR MAN'S BEST", end=QUESTION_PROMPT)
-    player_best = int(input())
+    player_best = int(input())  # noqa: TODO - this likely is a bug!
 
     print("WHAT IS HIS VULNERABILITY", end=QUESTION_PROMPT)
     player_weakness = int(input())
@@ -48,7 +48,7 @@ def play():
         if opponent_score >= 2 or player_score >= 2:
             break
 
-        for action in range(7):
+        for _action in range(7):
             if random.randint(1, 10) > 5:
                 # opponent swings
                 punch = random.randint(1, 4)

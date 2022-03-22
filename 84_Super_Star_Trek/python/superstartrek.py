@@ -14,6 +14,57 @@
 
 import random
 from math import sqrt
+from typing import Any, Callable, Dict, List, Tuple
+
+# Global variables
+restart = False
+s = 0
+e = 0
+d: List[int] = []
+k: List[List[float]] = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]  # Klingons in current quadrant
+devices = [
+    "WARP ENGINES",
+    "SHORT RANGE SENSORS",
+    "LONG RANGE SENSORS",
+    "PHASER CONTROL",
+    "PHOTON TUBES",
+    "DAMAGE CONTROL",
+    "SHIELD CONTROL",
+    "LIBRARY-COMPUTER",
+]
+c = [
+    [0, 1],
+    [-1, 1],
+    [-1, 0],
+    [-1, -1],
+    [0, -1],
+    [1, -1],
+    [1, 0],
+    [1, 1],
+    [0, 1],
+]  # vectors in cardinal directions
+q1 = s1 = 0
+q2 = s2 = 0
+k3 = b3 = s3 = 0  # Klingons, bases, stars in quad.
+
+b4 = b5 = 0
+qs = " " * 192  # quadrant string
+# set up global game variables
+g = [[0] * 8 for _ in range(8)]  # galaxy map
+z = [[0] * 8 for _ in range(8)]  # charted galaxy map
+d = [0] * 8  # damage stats for devices
+t = t0 = 100 * random.randint(20, 39)  # stardate (current, initial)
+t9 = random.randint(25, 34)  # mission duration (stardates)
+docked = False  # true when docked at starbase
+e = e0 = 3000  # energy (current, initial)
+p = p0 = 10  # torpedoes (current, initial)
+s = 0  # shields
+k9, b9 = 0, 0  # total Klingons, bases in galaxy
+# ^ bug in original, was b9 = 2
+s9 = 200  # avg. Klingon shield strength
+
+k7 = k9  # Klingons at start of game
+d4 = 0.5 * random.random()  # extra delay in repairs at base
 
 # -------------------------------------------------------------------------
 #  Utility functions
@@ -77,7 +128,7 @@ def compare_marker(row, col, test_marker):
     return qs[pos : (pos + 3)] == test_marker
 
 
-def find_empty_place():
+def find_empty_place() -> Tuple[int, int]:
     # Find an empty location in the current quadrant.
     while True:
         row, col = fnr(), fnr()
@@ -90,7 +141,7 @@ def find_empty_place():
 # -------------------------------------------------------------------------
 
 
-def navigation():
+def navigation() -> None:
     # Take navigation input and move the Enterprise.
     global d, s, e, k, qs, t, q1, q2, s1, s2
 
@@ -116,9 +167,7 @@ def navigation():
     if warp == 0:
         return
     if warp < 0 or warp > 8:
-        print(
-            "   CHIEF ENGINEER SCOTT REPORTS 'THE ENGINES WON'T TAKE " f"WARP {warp}!'"
-        )
+        print(f"   CHIEF ENGINEER SCOTT REPORTS 'THE ENGINES WON'T TAKE WARP {warp}!'")
         return
 
     n = round(warp * 8)
@@ -143,9 +192,9 @@ def navigation():
     line = ""
     for i in range(8):
         if d[i] < 0:
-            d[i] += min(warp, 1)
+            d[i] += min(warp, 1)  # type: ignore
             if -0.1 < d[i] < 0:
-                d[i] = -0.1
+                d[i] = -0.1  # type: ignore
             elif d[i] >= 0:
                 if len(line) == 0:
                     line = "DAMAGE CONTROL REPORT:"
@@ -159,9 +208,7 @@ def navigation():
             print(f"DAMAGE CONTROL REPORT:   {devices[r1]} DAMAGED\n")
         else:
             d[r1] += random.random() * 3 + 1
-            print(
-                f"DAMAGE CONTROL REPORT:   {devices[r1]} STATE OF " "REPAIR IMPROVED\n"
-            )
+            print(f"DAMAGE CONTROL REPORT:   {devices[r1]} STATE OF REPAIR IMPROVED\n")
 
     # begin moving starship
     insert_marker(int(s1), int(s2), "   ")
@@ -172,13 +219,13 @@ def navigation():
     x, y = s1, s2
 
     for _ in range(n):
-        s1 += x1
-        s2 += x2
+        s1 += x1  # type: ignore
+        s2 += x2  # type: ignore
 
         if s1 < 0 or s1 > 7 or s2 < 0 or s2 > 7:
             # exceeded quadrant limits; calculate final position
-            x += 8 * q1 + n * x1
-            y += 8 * q2 + n * x2
+            x += 8 * q1 + n * x1  # type: ignore
+            y += 8 * q2 + n * x2  # type: ignore
             q1, q2 = int(x / 8), int(y / 8)
             s1, s2 = int(x - q1 * 8), int(y - q2 * 8)
             if s1 < 0:
@@ -203,7 +250,7 @@ def navigation():
                 q2 = s2 = 7
             if hit_edge:
                 print("LT. UHURA REPORTS MESSAGE FROM STARFLEET COMMAND:")
-                print("  'PERMISSION TO ATTEMPT CROSSING OF GALACTIC " "PERIMETER")
+                print("  'PERMISSION TO ATTEMPT CROSSING OF GALACTIC PERIMETER")
                 print("  IS HEREBY *DENIED*. SHUT DOWN YOUR ENGINES.'")
                 print("CHIEF ENGINEER SCOTT REPORTS  'WARP ENGINES SHUT DOWN")
                 print(
@@ -235,7 +282,7 @@ def navigation():
     insert_marker(int(s1), int(s2), "<*>")
     maneuver_energy(n)
 
-    t += 0.1 * int(10 * warp) if warp < 1 else 1
+    t += 0.1 * int(10 * warp) if warp < 1 else 1  # type: ignore
     if t > t0 + t9:
         end_game(won=False, quit=False)
         return
@@ -256,21 +303,20 @@ def maneuver_energy(n):
         s = max(0, s)
 
 
-def short_range_scan():
+def short_range_scan() -> None:
     # Print a short range scan.
     global docked, e, p, s
 
     docked = False
     for i in (s1 - 1, s1, s1 + 1):
         for j in (s2 - 1, s2, s2 + 1):
-            if 0 <= i <= 7 and 0 <= j <= 7:
-                if compare_marker(i, j, ">!<"):
-                    docked = True
-                    cs = "DOCKED"
-                    e, p = e0, p0
-                    print("SHIELDS DROPPED FOR DOCKING PURPOSES")
-                    s = 0
-                    break
+            if 0 <= i <= 7 and 0 <= j <= 7 and compare_marker(i, j, ">!<"):
+                docked = True
+                cs = "DOCKED"
+                e, p = e0, p0
+                print("SHIELDS DROPPED FOR DOCKING PURPOSES")
+                s = 0
+                break
         else:
             continue
         break
@@ -315,15 +361,21 @@ def short_range_scan():
     print(sep)
 
 
-def long_range_scan():
+def long_range_scan() -> None:
     # Print a long range scan.
-    global z
+    global z, g
 
     if d[2] < 0:
         print("LONG RANGE SENSORS ARE INOPERABLE")
         return
 
     print(f"LONG RANGE SCAN FOR QUADRANT {q1 + 1} , {q2 + 1}")
+    print_scan_results(q1, q2, g, z)
+
+
+def print_scan_results(
+    q1: int, q2: int, g: List[List[Any]], z: List[List[Any]]
+) -> None:
     sep = "-------------------"
     print(sep)
     for i in (q1 - 1, q1, q1 + 1):
@@ -335,16 +387,16 @@ def long_range_scan():
                 z[i][j] = g[i][j]
 
         line = ": "
-        for l in range(3):
-            if n[l] < 0:
+        for line_index in range(3):
+            if n[line_index] < 0:
                 line += "*** : "
             else:
-                line += str(n[l] + 1000).rjust(4, " ")[-3:] + " : "
+                line += str(n[line_index] + 1000).rjust(4, " ")[-3:] + " : "
         print(line)
         print(sep)
 
 
-def phaser_control():
+def phaser_control() -> None:
     # Take phaser control input and fire phasers.
     global e, k, g, z, k3, k9
 
@@ -364,9 +416,9 @@ def phaser_control():
     x = 0
     while True:
         while True:
-            xs = input("NUMBER OF UNITS TO FIRE? ")
-            if len(xs) > 0:
-                x = int(xs)
+            units_to_fire = input("NUMBER OF UNITS TO FIRE? ")
+            if len(units_to_fire) > 0:
+                x = int(units_to_fire)
                 break
         if x <= 0:
             return
@@ -376,7 +428,7 @@ def phaser_control():
 
     e -= x
     if d[7] < 0:  # bug in original, was d[6]
-        x *= random.random()
+        x *= random.random()  # type: ignore
 
     h1 = int(x / k3)
     for i in range(3):
@@ -385,14 +437,10 @@ def phaser_control():
 
         h = int((h1 / fnd(i)) * (random.random() + 2))
         if h <= 0.15 * k[i][2]:
-            print(
-                "SENSORS SHOW NO DAMAGE TO ENEMY AT " f"{k[i][0] + 1} , {k[i][1] + 1}"
-            )
+            print(f"SENSORS SHOW NO DAMAGE TO ENEMY AT {k[i][0] + 1} , {k[i][1] + 1}")
         else:
             k[i][2] -= h
-            print(
-                f" {h} UNIT HIT ON KLINGON AT SECTOR " f"{k[i][0] + 1} , {k[i][1] + 1}"
-            )
+            print(f" {h} UNIT HIT ON KLINGON AT SECTOR {k[i][0] + 1} , {k[i][1] + 1}")
             if k[i][2] <= 0:
                 print("*** KLINGON DESTROYED ***")
                 k3 -= 1
@@ -410,7 +458,7 @@ def phaser_control():
     klingons_fire()
 
 
-def photon_torpedoes():
+def photon_torpedoes() -> None:
     # Take photon torpedo input and process firing of torpedoes.
     global e, p, k3, k9, k, b3, b9, docked, g, z
 
@@ -422,9 +470,9 @@ def photon_torpedoes():
         return
 
     while True:
-        c1s = input("PHOTON TORPEDO COURSE (1-9)? ")
-        if len(c1s) > 0:
-            c1 = float(c1s)
+        torpedo_course = input("PHOTON TORPEDO COURSE (1-9)? ")
+        if len(torpedo_course) > 0:
+            c1 = float(torpedo_course)
             break
     if c1 == 9:
         c1 = 1
@@ -441,8 +489,8 @@ def photon_torpedoes():
     x3, y3 = x, y
     print("TORPEDO TRACK:")
     while True:
-        x += x1
-        y += x2
+        x += x1  # type: ignore
+        y += x2  # type: ignore
         x3, y3 = round(x), round(y)
         if x3 < 0 or x3 > 7 or y3 < 0 or y3 > 7:
             print("TORPEDO MISSED")
@@ -508,9 +556,7 @@ def klingons_fire():
         h = int((k[i][2] / fnd(i)) * (random.random() + 2))
         s -= h
         k[i][2] /= random.random() + 3
-        print(
-            f" {h} UNIT HIT ON ENTERPRISE FROM SECTOR " f"{k[i][0] + 1} , {k[i][1] + 1}"
-        )
+        print(f" {h} UNIT HIT ON ENTERPRISE FROM SECTOR {k[i][0] + 1} , {k[i][1] + 1}")
         if s <= 0:
             end_game(won=False, quit=False, enterprise_killed=True)
             return
@@ -518,10 +564,10 @@ def klingons_fire():
         if h >= 20 and random.random() < 0.60 and h / s > 0.02:
             r1 = fnr()
             d[r1] -= h / s + 0.5 * random.random()
-            print(f"DAMAGE CONTROL REPORTS  '{devices[r1]} DAMAGED " "BY THE HIT'")
+            print(f"DAMAGE CONTROL REPORTS  '{devices[r1]} DAMAGED BY THE HIT'")
 
 
-def shield_control():
+def shield_control() -> None:
     # Raise or lower the shields.
     global e, s
 
@@ -530,9 +576,11 @@ def shield_control():
         return
 
     while True:
-        xs = input(f"ENERGY AVAILABLE = {e + s} NUMBER OF UNITS TO SHIELDS? ")
-        if len(xs) > 0:
-            x = int(xs)
+        energy_to_shield = input(
+            f"ENERGY AVAILABLE = {e + s} NUMBER OF UNITS TO SHIELDS? "
+        )
+        if len(energy_to_shield) > 0:
+            x = int(energy_to_shield)
             break
 
     if x < 0 or s == x:
@@ -576,8 +624,8 @@ def damage_control():
     if d3 >= 1:
         d3 = 0.9
     print("\nTECHNICIANS STANDING BY TO EFFECT REPAIRS TO YOUR SHIP;")
-    print("ESTIMATED TIME TO REPAIR: " f"{round(0.01 * int(100 * d3), 2)} STARDATES")
-    if input("WILL YOU AUTHORIZE THE " "REPAIR ORDER (Y/N)? ").upper().strip() != "Y":
+    print(f"ESTIMATED TIME TO REPAIR: {round(0.01 * int(100 * d3), 2)} STARDATES")
+    if input("WILL YOU AUTHORIZE THE REPAIR ORDER (Y/N)? ").upper().strip() != "Y":
         return
 
     for i in range(8):
@@ -586,7 +634,7 @@ def damage_control():
     t += d3 + 0.1
 
 
-def computer():
+def computer() -> None:
     # Perform the various functions of the library computer.
     global d, z, k9, t0, t9, t, b9, s1, s2, b4, b5
 
@@ -595,11 +643,11 @@ def computer():
         return
 
     while True:
-        coms = input("COMPUTER ACTIVE AND AWAITING COMMAND? ")
-        if len(coms) == 0:
+        command = input("COMPUTER ACTIVE AND AWAITING COMMAND? ")
+        if len(command) == 0:
             com = 6
         else:
-            com = int(coms)
+            com = int(command)
         if com < 0:
             return
 
@@ -667,9 +715,7 @@ def computer():
                 )
                 return
 
-            print(
-                "FROM ENTERPRISE TO KLINGON BATTLE " f"CRUISER{'S' if k3 > 1 else ''}"
-            )
+            print(f"FROM ENTERPRISE TO KLINGON BATTLE CRUISER{'S' if k3 > 1 else ''}")
 
             for i in range(3):
                 if k[i][2] > 0:
@@ -688,18 +734,18 @@ def computer():
             return
         elif com == 4:
             print("DIRECTION/DISTANCE CALCULATOR:")
-            print(f"YOU ARE AT QUADRANT {q1+1} , {q2+1} SECTOR " f"{s1+1} , {s2+1}")
+            print(f"YOU ARE AT QUADRANT {q1+1} , {q2+1} SECTOR {s1+1} , {s2+1}")
             print("PLEASE ENTER")
             while True:
-                ins = input("  INITIAL COORDINATES (X,Y)? ").split(",")
-                if len(ins) == 2:
-                    from1, from2 = int(ins[0]) - 1, int(ins[1]) - 1
+                coordinates = input("  INITIAL COORDINATES (X,Y)? ").split(",")
+                if len(coordinates) == 2:
+                    from1, from2 = int(coordinates[0]) - 1, int(coordinates[1]) - 1
                     if 0 <= from1 <= 7 and 0 <= from2 <= 7:
                         break
             while True:
-                ins = input("  FINAL COORDINATES (X,Y)? ").split(",")
-                if len(ins) == 2:
-                    to1, to2 = int(ins[0]) - 1, int(ins[1]) - 1
+                coordinates = input("  FINAL COORDINATES (X,Y)? ").split(",")
+                if len(coordinates) == 2:
+                    to1, to2 = int(coordinates[0]) - 1, int(coordinates[1]) - 1
                     if 0 <= to1 <= 7 and 0 <= to2 <= 7:
                         break
             print_direction(from1, from2, to1, to2)
@@ -716,7 +762,7 @@ def computer():
             )
 
 
-def print_direction(from1, from2, to1, to2):
+def print_direction(from1, from2, to1, to2) -> None:
     # Print direction and distance between two locations in the grid.
     delta1 = -(to1 - from1)  # flip so positive is up (heading = 3)
     delta2 = to2 - from2
@@ -750,7 +796,7 @@ def print_direction(from1, from2, to1, to2):
 # -------------------------------------------------------------------------
 
 
-def startup():
+def startup() -> None:
     # Initialize the game variables and map, and print startup messages.
     global g, z, d, t, t0, t9, docked, e, e0, p, p0, s, k9, b9, s9, c
     global devices, q1, q2, s1, s2, k7
@@ -848,7 +894,7 @@ def startup():
     )
 
 
-def new_quadrant():
+def new_quadrant() -> None:
     # Enter a new quadrant: populate map and print a short range scan.
     global z, k3, b3, s3, d4, k, qs, b4, b5
 
@@ -885,21 +931,23 @@ def new_quadrant():
     if b3 > 0:
         b4, b5 = find_empty_place()  # position of starbase (sector)
         insert_marker(b4, b5, ">!<")
-    for i in range(s3):
+    for _ in range(s3):
         r1, r2 = find_empty_place()
         insert_marker(r1, r2, " * ")
 
     short_range_scan()
 
 
-def end_game(won=False, quit=True, enterprise_killed=False):
+def end_game(
+    won: bool = False, quit: bool = True, enterprise_killed: bool = False
+) -> None:
     # Handle end-of-game situations.
     global restart
 
     if won:
         print("CONGRATULATIONS, CAPTAIN! THE LAST KLINGON BATTLE CRUISER")
         print("MENACING THE FEDERATION HAS BEEN DESTROYED.\n")
-        print("YOUR EFFICIENCY RATING IS " f"{round(1000 * (k7 / (t - t0))**2, 4)}\n\n")
+        print(f"YOUR EFFICIENCY RATING IS {round(1000 * (k7 / (t - t0))**2, 4)}\n\n")
     else:
         if not quit:
             if enterprise_killed:
@@ -910,14 +958,14 @@ def end_game(won=False, quit=True, enterprise_killed=False):
             print(f"IT IS STARDATE {round(t, 1)}")
 
         print(f"THERE WERE {k9} KLINGON BATTLE CRUISERS LEFT AT")
-        print(f"THE END OF YOUR MISSION.\n\n")
+        print("THE END OF YOUR MISSION.\n\n")
 
         if b9 == 0:
             exit()
 
     print("THE FEDERATION IS IN NEED OF A NEW STARSHIP COMMANDER")
     print("FOR A SIMILAR MISSION -- IF THERE IS A VOLUNTEER,")
-    if input("LET HIM STEP FORWARD AND " "ENTER 'AYE'? ").upper().strip() != "AYE":
+    if input("LET HIM STEP FORWARD AND ENTER 'AYE'? ").upper().strip() != "AYE":
         exit()
     restart = True
 
@@ -927,10 +975,10 @@ def end_game(won=False, quit=True, enterprise_killed=False):
 # -------------------------------------------------------------------------
 
 
-def main():
+def main() -> None:
     global restart
 
-    f = {
+    f: Dict[str, Callable[[], None]] = {
         "NAV": navigation,
         "SRS": short_range_scan,
         "LRS": long_range_scan,

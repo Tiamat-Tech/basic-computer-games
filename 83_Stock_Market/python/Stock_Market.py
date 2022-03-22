@@ -49,7 +49,7 @@ class Stock_Market:
         for stock, change in zip(self.data.values(), self.changes):
             stock["Price"] = round(stock["Price"] + (change / 100) * stock["Price"], 2)
 
-    def print_exchange_average(self):
+    def print_exchange_average(self) -> None:
 
         sum = 0
         for stock in self.data.values():
@@ -65,7 +65,7 @@ class Stock_Market:
 
         return round(sum / 5, 2)
 
-    def print_first_day(self):
+    def print_first_day(self) -> None:
 
         print("\nSTOCK\t\t\t\t\tINITIALS\tPRICE/SHARE($)")
         for stock, data in self.data.items():
@@ -81,12 +81,12 @@ class Stock_Market:
 
         print("\nWHAT IS YOUR TRANSACTION IN")
         flag = False
-        while flag != True:
+        while not flag:
             new_holdings = []
             for stock in self.data.keys():
                 try:
                     new_holdings.append(int(input(f"{stock}? ")))
-                except:
+                except Exception:
                     print("\nINVALID ENTRY, TRY AGAIN\n")
                     break
             if len(new_holdings) == 5:
@@ -94,7 +94,7 @@ class Stock_Market:
 
         return new_holdings
 
-    def print_trading_day(self):
+    def print_trading_day(self) -> None:
 
         print("STOCK\tPRICE/SHARE\tHOLDINGS\tNET. Value\tPRICE CHANGE")
         for stock, data, change in zip(
@@ -128,7 +128,7 @@ class Stock_Market:
 
         self.stock_assets = round(sum, 2)
 
-    def print_assets(self):
+    def print_assets(self) -> None:
 
         print(f"\nTOTAL STOCK ASSETS ARE: ${self.stock_assets:.2f}")
         print(f"TOTAL CASH ASSETS ARE: ${self.cash_assets:.2f}")
@@ -162,7 +162,7 @@ class Stock_Market:
             stock["Holdings"] += new_holding
 
 
-def print_instruction():
+def print_instruction() -> None:
 
     print(
         """

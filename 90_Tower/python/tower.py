@@ -8,7 +8,7 @@ class Disk:
     def size(self):
         return self.__size
 
-    def print(self):
+    def print(self) -> None:
         print("[ %s ]" % self.size())
 
 
@@ -39,26 +39,9 @@ class Tower:
             raise Exception("empty pop")
         return self.__disks.pop()
 
-    def print(self):
+    def print(self) -> None:
         r = "Needle: [%s]" % (", ".join([str(x.size()) for x in self.__disks]))
         print(r)
-
-
-print(
-    """
-IN THIS PROGRAM, WE SHALL REFER TO DISKS BY NUMERICAL CODE.
-3 WILL REPRESENT THE SMALLEST DISK, 5 THE NEXT SIZE,
-7 THE NEXT, AND SO ON, UP TO 15.  IF YOU DO THE PUZZLE WITH
-2 DISKS, THEIR CODE NAMES WOULD BE 13 AND 15.  WITH 3 DISKS
-THE CODE NAMES WOULD BE 11, 13 AND 15, ETC.  THE NEEDLES
-ARE NUMBERED FROM LEFT TO RIGHT, 1 TO 3.  WE WILL
-START WITH THE DISKS ON NEEDLE 1, AND ATTEMPT TO MOVE THEM
-TO NEEDLE 3.
-
-GOOD LUCK!
-
-"""
-)
 
 
 class Game:
@@ -80,7 +63,7 @@ class Game:
     def winner(self):
         return self.__towers[0].empty() and self.__towers[1].empty()
 
-    def print(self):
+    def print(self) -> None:
         for t in self.__towers:
             t.print()
 
@@ -91,15 +74,14 @@ class Game:
         w = int(input("WHICH DISK WOULD YOU LIKE TO MOVE\n"))
         if w in self.__sizes:
             return w
-        else:
-            raise Exception()
+        raise Exception()
 
     def pick_disk(self):
         which = None
         while which is None:
             try:
                 which = self.which_disk()
-            except:
+            except Exception:
                 print("ILLEGAL ENTRY... YOU MAY ONLY TYPE 3,5,7,9,11,13, OR 15.\n")
 
         valids = [t for t in self.__towers if t.top() and t.top().size() == which]
@@ -115,7 +97,7 @@ class Game:
         try:
             needle = int(input("PLACE DISK ON WHICH NEEDLE\n"))
             tower = self.__towers[needle - 1]
-        except:
+        except Exception:
             print(
                 "I'LL ASSUME YOU HIT THE WRONG KEY THIS TIME.  BUT WATCH IT,\nI ONLY ALLOW ONE MISTAKE.\n"
             )
@@ -145,27 +127,48 @@ class Game:
             from_tower.add(disk)
 
 
-game = Game()
-while True:
-    game.print()
+def main() -> None:
+    print(
+        """
+    IN THIS PROGRAM, WE SHALL REFER TO DISKS BY NUMERICAL CODE.
+    3 WILL REPRESENT THE SMALLEST DISK, 5 THE NEXT SIZE,
+    7 THE NEXT, AND SO ON, UP TO 15.  IF YOU DO THE PUZZLE WITH
+    2 DISKS, THEIR CODE NAMES WOULD BE 13 AND 15.  WITH 3 DISKS
+    THE CODE NAMES WOULD BE 11, 13 AND 15, ETC.  THE NEEDLES
+    ARE NUMBERED FROM LEFT TO RIGHT, 1 TO 3.  WE WILL
+    START WITH THE DISKS ON NEEDLE 1, AND ATTEMPT TO MOVE THEM
+    TO NEEDLE 3.
 
-    game.take_turn()
+    GOOD LUCK!
 
-    if game.winner():
-        print(
-            "CONGRATULATIONS!!\nYOU HAVE PERFORMED THE TASK IN %s MOVES.\n"
-            % game.moves()
-        )
-        while True:
-            yesno = input("TRY AGAIN (YES OR NO)\n")
-            if yesno.upper() == "YES":
-                game = Game()
-                break
-            elif yesno.upper() == "NO":
-                print("THANKS FOR THE GAME!\n")
-                sys.exit(0)
-            else:
-                print("'YES' OR 'NO' PLEASE\n")
-    elif game.moves() > 128:
-        print("SORRY, BUT I HAVE ORDERS TO STOP IF YOU MAKE MORE THAN 128 MOVES.")
-        sys.exit(0)
+    """
+    )
+
+    game = Game()
+    while True:
+        game.print()
+
+        game.take_turn()
+
+        if game.winner():
+            print(
+                "CONGRATULATIONS!!\nYOU HAVE PERFORMED THE TASK IN %s MOVES.\n"
+                % game.moves()
+            )
+            while True:
+                yesno = input("TRY AGAIN (YES OR NO)\n")
+                if yesno.upper() == "YES":
+                    game = Game()
+                    break
+                elif yesno.upper() == "NO":
+                    print("THANKS FOR THE GAME!\n")
+                    sys.exit(0)
+                else:
+                    print("'YES' OR 'NO' PLEASE\n")
+        elif game.moves() > 128:
+            print("SORRY, BUT I HAVE ORDERS TO STOP IF YOU MAKE MORE THAN 128 MOVES.")
+            sys.exit(0)
+
+
+if __name__ == "__main__":
+    main()

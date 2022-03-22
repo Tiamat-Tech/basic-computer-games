@@ -18,9 +18,7 @@ class Canvas:
 
     def render(self):
         lines = ["       1 2 3 4 5 6 7 8 9"]
-        row = 0
-        for line in self._buffer:
-            row += 1
+        for row, line in enumerate(self._buffer, start=1):
             lines.append(" " + str(row) + " " * 5 + " ".join(line))
         return "\n".join(lines)
 
@@ -105,7 +103,7 @@ def play_game():
                 break
 
 
-def main():
+def main() -> None:
     print(" " * 33 + "CHOMP")
     print(" " * 15 + "CREATIVE COMPUTING  MORRISTOWN, NEW JERSEY\n")
     print("THIS IS THE GAME OF CHOMP (SCIENTIFIC AMERICAN, JAN 1973)")

@@ -28,6 +28,8 @@ out/
 *.py[co]
 .python-version
 Pipfile
+venv/
+.coverage
 
 .DS_Store
 .vs/
